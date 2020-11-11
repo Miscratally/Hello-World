@@ -1,0 +1,211 @@
+classdef GPRMC_Location_App < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure                    matlab.ui.Figure
+       InputGPRMCMessageEditFieldLabel  matlab.ui.control.Label
+        InputGPRMCMessageEditField  matlab.ui.control.EditField
+        ConfirmButton               matlab.ui.control.Button
+        LatitudeTextAreaLabel       matlab.ui.control.Label
+        LatitudeTextArea            matlab.ui.control.TextArea
+        UTCTimeTextAreaLabel        matlab.ui.control.Label
+        UTCTimeTextArea             matlab.ui.control.TextArea
+        LongitudeTextAreaLabel      matlab.ui.control.Label
+        LongitudeTextArea           matlab.ui.control.TextArea
+        SpeedTextAreaLabel          matlab.ui.control.Label
+        SpeedTextArea               matlab.ui.control.TextArea
+        UTCDateTextAreaLabel        matlab.ui.control.Label
+        UTCDateTextArea             matlab.ui.control.TextArea
+        StatusTextAreaLabel         matlab.ui.control.Label
+        StatusTextArea              matlab.ui.control.TextArea
+        UIAxes                      matlab.ui.control.UIAxes
+    end
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Button pushed function: ConfirmButton
+        function ConfirmButtonPushed(app, event)
+            format long g
+            N = 5;
+            Data = regexp(app.InputGPRMCMessageEditField.Value, ',', 'split');
+            Flag_1 = sprintf('%s', Data{5});
+            Flag_2 = sprintf('%s', Data{7});
+            Use_Data = strings(1, N);
+            for j = 1:N
+                Use_Data(1, j) = Data(2 * j);
+            end
+            
+            UTC_Time_T = sprintf('%s', Use_Data(1));
+            Latitude_T = sprintf('%s', Use_Data(2));
+            Longitude_T = sprintf('%s', Use_Data(3));
+            Speed_T = sprintf('%s', Use_Data(4));
+            UTC_Date_T = sprintf('%s', Use_Data(5));
+            
+            app.UTCTimeTextArea.Value = [UTC_Time_T(1:2), ' ', 'Hour', ' ', UTC_Time_T(3:4), ' ', 'Min', ' ', UTC_Time_T(5:6), ' ', 'Sed'];
+            app.LatitudeTextArea.Value = [Flag_1, ' ', Latitude_T];
+            app.LongitudeTextArea.Value = [Flag_2, ' ', Longitude_T];
+            app.SpeedTextArea.Value = [Speed_T, ' ', 'Knots'];
+            app.UTCDateTextArea.Value = [UTC_Date_T(1:2), ' ', 'Year', ' ', UTC_Date_T(3:4), ' ', 'Mon', ' ', UTC_Date_T(5:6), ' ', 'Day'];; 
+            
+                                                             
+            if str2num(Use_Data(4))
+                Status_Flag = 'Moving';
+            else
+                Status_Flag = 'Still';
+            end
+            app.StatusTextArea.Value = Status_Flag;
+            
+            Latitude = str2num(Use_Data(2));
+            Longitude = str2num(Use_Data(3));
+            plot(app.UIAxes, Longitude, Latitude, "r*");
+       end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 634 503];
+            app.UIFigure.Name = 'UI Figure';
+
+            % Create InputGPRMCMessageEditFieldLabel
+            app.InputGPRMCMessageEditFieldLabel = uilabel(app.UIFigure);
+            app.InputGPRMCMessageEditFieldLabel.HorizontalAlignment = 'center';
+            app.InputGPRMCMessageEditFieldLabel.FontName = 'Candara';
+            app.InputGPRMCMessageEditFieldLabel.FontWeight = 'bold';
+            app.InputGPRMCMessageEditFieldLabel.FontColor = [1 0 0];
+            app.InputGPRMCMessageEditFieldLabel.Position = [57 438 127 22];
+            app.InputGPRMCMessageEditFieldLabel.Text = 'Input $GPRMC Message';
+
+            % Create InputGPRMCMessageEditField
+            app.InputGPRMCMessageEditField = uieditfield(app.UIFigure, 'text');
+            app.InputGPRMCMessageEditField.Position = [204 438 381 22];
+
+            % Create ConfirmButton
+            app.ConfirmButton = uibutton(app.UIFigure, 'push');
+            app.ConfirmButton.ButtonPushedFcn = createCallbackFcn(app, @ConfirmButtonPushed, true);
+            app.ConfirmButton.Position = [271 376 100 22];
+            app.ConfirmButton.Text = {'Confirm'; ''};
+
+            % Create LatitudeTextAreaLabel
+           app.LatitudeTextAreaLabel = uilabel(app.UIFigure);
+            app.LatitudeTextAreaLabel.BackgroundColor = [0.9412 0.9412 0.9412];
+            app.LatitudeTextAreaLabel.HorizontalAlignment = 'right';
+            app.LatitudeTextAreaLabel.Position = [37 230 48 22];
+            app.LatitudeTextAreaLabel.Text = 'Latitude';
+
+            % Create LatitudeTextArea
+            app.LatitudeTextArea = uitextarea(app.UIFigure);
+            app.LatitudeTextArea.HorizontalAlignment = 'center';
+            app.LatitudeTextArea.BackgroundColor = [0.9412 0.9412 0.9412];
+            app.LatitudeTextArea.Position = [117 226 136 28];
+
+            % Create UTCTimeTextAreaLabel
+            app.UTCTimeTextAreaLabel = uilabel(app.UIFigure);
+            app.UTCTimeTextAreaLabel.HorizontalAlignment = 'right';
+            app.UTCTimeTextAreaLabel.Position = [37 270 60 22];
+            app.UTCTimeTextAreaLabel.Text = 'UTC Time';
+
+            % Create UTCTimeTextArea
+            app.UTCTimeTextArea = uitextarea(app.UIFigure);
+            app.UTCTimeTextArea.HorizontalAlignment = 'center';
+            app.UTCTimeTextArea.BackgroundColor = [0.9412 0.9412 0.9412];
+            app.UTCTimeTextArea.Position = [117 266 136 28];
+
+            % Create LongitudeTextAreaLabel
+            app.LongitudeTextAreaLabel = uilabel(app.UIFigure);
+            app.LongitudeTextAreaLabel.BackgroundColor = [0.9412 0.9412 0.9412];
+            app.LongitudeTextAreaLabel.HorizontalAlignment = 'right';
+            app.LongitudeTextAreaLabel.Position = [37 190 58 22];
+            app.LongitudeTextAreaLabel.Text = 'Longitude';
+
+            % Create LongitudeTextArea
+            app.LongitudeTextArea = uitextarea(app.UIFigure);
+            app.LongitudeTextArea.HorizontalAlignment = 'center';
+            app.LongitudeTextArea.BackgroundColor = [0.9412 0.9412 0.9412];
+            app.LongitudeTextArea.Position = [117 186 136 28];
+
+            % Create SpeedTextAreaLabel
+            app.SpeedTextAreaLabel = uilabel(app.UIFigure);
+            app.SpeedTextAreaLabel.BackgroundColor = [0.9412 0.9412 0.9412];
+            app.SpeedTextAreaLabel.HorizontalAlignment = 'right';
+            app.SpeedTextAreaLabel.Position = [37 150 40 22];
+            app.SpeedTextAreaLabel.Text = 'Speed';
+
+            % Create SpeedTextArea
+            app.SpeedTextArea = uitextarea(app.UIFigure);
+            app.SpeedTextArea.HorizontalAlignment = 'center';
+            app.SpeedTextArea.BackgroundColor = [0.9412 0.9412 0.9412];
+            app.SpeedTextArea.Position = [117 146 136 28];
+
+            % Create UTCDateTextAreaLabel
+            app.UTCDateTextAreaLabel = uilabel(app.UIFigure);
+            app.UTCDateTextAreaLabel.BackgroundColor = [0.9412 0.9412 0.9412];
+            app.UTCDateTextAreaLabel.HorizontalAlignment = 'right';
+            app.UTCDateTextAreaLabel.Position = [37 110 59 22];
+            app.UTCDateTextAreaLabel.Text = 'UTC Date';
+
+            % Create UTCDateTextArea
+            app.UTCDateTextArea = uitextarea(app.UIFigure);
+            app.UTCDateTextArea.HorizontalAlignment = 'center';
+            app.UTCDateTextArea.BackgroundColor = [0.9412 0.9412 0.9412];
+            app.UTCDateTextArea.Position = [117 106 136 28];
+
+            % Create StatusTextAreaLabel
+            app.StatusTextAreaLabel = uilabel(app.UIFigure);
+            app.StatusTextAreaLabel.BackgroundColor = [0.9412 0.9412 0.9412];
+            app.StatusTextAreaLabel.HorizontalAlignment = 'right';
+            app.StatusTextAreaLabel.Position = [37 70 40 22];
+            app.StatusTextAreaLabel.Text = 'Status';
+
+            % Create StatusTextArea
+            app.StatusTextArea = uitextarea(app.UIFigure);
+            app.StatusTextArea.HorizontalAlignment = 'center';
+            app.StatusTextArea.BackgroundColor = [0.9412 0.9412 0.9412];
+            app.StatusTextArea.Position = [117 66 136 28];
+
+            % Create UIAxes
+            app.UIAxes = uiaxes(app.UIFigure);
+            title(app.UIAxes, 'Location')
+            xlabel(app.UIAxes, 'Longitude')
+            ylabel(app.UIAxes, 'Latitude')
+            app.UIAxes.XGrid = 'on';
+            app.UIAxes.YGrid = 'on';
+            app.UIAxes.TitleFontWeight = 'bold';
+            app.UIAxes.Position = [291 54 300 240];
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = GPRMC_Location_App
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end
